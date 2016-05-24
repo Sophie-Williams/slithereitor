@@ -8,18 +8,17 @@ using namespace std;
 
 int main() {
 
-    int fim;
+    int end;
 
     srand(time(NULL));
-    // Recebe do jogo uma flag indicando se o jogo acabou
-    while (scanf("%d",&fim) and !fim) {
-        // TODO: Receber outras coisas (TODO fazer o jogo envia-las tb)
 
-        // Imprime o angulo o qual andar em graus. 0 = frente
-        int ang = 30;   // gira 30 graus
+    // Read a flag indicating wheter the game has finished
+    while (scanf("%d",&end) and !end) {
+        // TODO: Read other things (TODO make the game send them)
+
+        // Print the angle the snake will turn (0 = go forward)
+        int ang = 30;   // turns 30 degrees
         printf("%d\n", ang);
-
-        // garantir
         fflush(stdout);
     }
 

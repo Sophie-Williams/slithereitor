@@ -7,94 +7,96 @@
 
 using namespace std;
 
-int fd_torobo[2], fd_fromrobo[2];
+int fd_tobot[2], fd_frombot[2];
 
 int main(int argc, char *argv[]) {
 
-    //Abre o robo
+    // Load the bot
     if (argc != 2) {
-        fprintf(stderr,"Uso: %s <executavel_do_robo_1>\n",argv[0]);
+        fprintf(stderr,"Usage: %s <bot exec>\n",argv[0]);
         return 1;
     }
 
-    pipe(fd_torobo);
-    pipe(fd_fromrobo);
+    pipe(fd_tobot);
+    pipe(fd_frombot);
     pid_t pid = fork();
-    if (pid==0) { // sou o robo
-        dup2(fd_torobo[0], STDIN_FILENO);
-        dup2(fd_fromrobo[1], STDOUT_FILENO);
-        close(fd_torobo[1]);
-        close(fd_fromrobo[0]);
+    if (pid==0) {
+        // I am the robot
+        dup2(fd_tobot[0], STDIN_FILENO);
+        dup2(fd_frombot[1], STDOUT_FILENO);
+        close(fd_tobot[1]);
+        close(fd_frombot[0]);
         execl(argv[1],"./", (char *)NULL);
         exit(1);
     }
-    // sou o jogo
-
-    FILE *rin = fdopen(fd_torobo[1], "w");
-    FILE *rout = fdopen(fd_fromrobo[0], "r");
-    close(fd_torobo[0]);
-    close(fd_fromrobo[1]);
+    // I am the game
+    FILE *rin = fdopen(fd_tobot[1], "w");
+    FILE *rout = fdopen(fd_frombot[0], "r");
+    close(fd_tobot[0]);
+    close(fd_frombot[1]);
 
     if (rin== NULL or rout==NULL) {
-        printf("fodeu\n");
+        printf("Couldn't talk to the bot.\n");
         return 1;
     }
 
-    // Inicializa coisas da SDL
+    // SDL Init
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        printf("Erro: %s\n",SDL_GetError());
+        printf("Error: %s\n",SDL_GetError());
         return 1;
     }
 
     SDL_Window *window = SDL_CreateWindow("Slithereitor", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
     if (window == NULL) {
-        printf("Erro ao criar janela: %s\n",SDL_GetError());
+        printf("Error opening the window: %s\n",SDL_GetError());
         return 1;
     }
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL) {
-        printf("Erro ao criar renderizador: %s\n",SDL_GetError());
+        printf("Error creating the renderer: %s\n",SDL_GetError());
         SDL_DestroyWindow(window);
         return 1;
     }
 
-    // Cria uma cobrinha azul marota
-    SL_cobra* blue = criacobra(230, 130, 130, 130, 0, 0, 255);
+    // Create an awesome blue little snake
+    SL_snake* blue = create_snake(230, 130, 130, 130, 0, 0, 255);
 
-    // laco principal
+    // main loop
     for (int tt=0;tt<70;tt++) {
 
-        // Avisa o robo que o jogo ainda nao acabou
+        // Tell the bot the game hasn't finished yet
         fprintf(rin,"0\n"); fflush(rin);
 
-        // TODO: Enviar outras informacoes ao robo
+        // TODO: Send other infos to the bot
 
-        // Le a jogada do robo
+        // Read a move from the bot
         int ang;
         fscanf(rout,"%d",&ang);
 
-        // Faz a cobrinha andar para frente em 10px com o angulo dado
+        // Walk the snake 10px with the given angle
         walk(blue, 10, ang);
 
-        // Fundo branco
+        // White background
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
 
-        desenha_cobra(renderer, blue);    // desenha a cobra
+        // Draw the snake
+        draw_snake(renderer, blue);
 
-        // Mostra na tela e aguarda
+        // Render and wait
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
 
     }
 
-    // destroi memoria
+    // Free the memory
     fclose(rin);
     fclose(rout);
-    matacobra(blue);
+    free_snake(blue);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
     return 0;
 }

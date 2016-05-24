@@ -5,28 +5,28 @@
 
 typedef struct {
     double x, y;
-} SL_Point;             // Um ponto com coordenadas double
+} SL_Point;             // A point with double coordinates
 
+// A snake
 typedef struct {
-    int r,g,b;          // cor da cobra
-    double tam;         // tamanho da cobra
-    double vx, vy;      // versor diretor para onde a cobra esta indo
-    int ncorpo;         // numero de elementos em corpo
-    SL_Point *corpo;    // pontos no corpo da cobra. A cabeca da cobra esta em
-                        // corpo[0]
-    SDL_Point *corpoi;  // corpo com coordenadas inteiras para o SDL
-} SL_cobra;
+    int r,g,b;         // Color
+    double size;       // lenght
+    double vx, vy;     // vector indicating the direction
+    int nbody;         // number of points in its body
+    SL_Point *body;    // points in its body. The head is body[0]
+    SDL_Point *bodyi;  // body[] with integer coordinates (for SDL)
+} SL_snake;
 
 inline int cmpf(double, double );
 
 double dist(SL_Point *, SL_Point *);
 
-SL_cobra *criacobra(int, int, int, int, int, int, int);
+SL_snake *create_snake(int, int, int, int, int, int, int);
 
-void matacobra(SL_cobra *);
+void free_snake(SL_snake *);
 
-void desenha_cobra(SDL_Renderer *, SL_cobra *);
+void draw_snake(SDL_Renderer *, SL_snake *);
 
-void rotaciona(double &, double &, int);
+void rotate(double &, double &, int);
 
-void walk(SL_cobra *, int, int);
+void walk(SL_snake *, int, int);
